@@ -1,0 +1,87 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+
+class Student {
+public:
+    std::string name;
+    int studentID;
+
+    Student() : studentID(0) {}
+
+    Student(const std::string& n, int id) : name(n), studentID(id) {}
+
+    friend std::ostream& operator<<(std::ostream& os, const Student& student) {
+        os << student.name << " " << student.studentID;
+        return os;
+    }
+
+    friend std::istream& operator>>(std::istream& is, Student& student) {
+        is >> student.name >> student.studentID;
+        return is;
+    }
+};
+
+class StudentManagementSystem {
+private:
+    std::vector<Student> students;
+
+public:
+    void addStudent(const Student& student) {
+        students.push_back(student);
+    }
+
+    void saveToFile(const std::string& filename) const {
+        std::ofstream file(filename);
+        if (file.is_open()) {
+            for (const auto& student : students) {
+                file << student << "\n";
+            }
+            file.close();
+            std::cout << "Data saved to " << filename << "\n";
+        } else {
+            std::cerr << "Unable to open file for saving: " << filename << "\n";
+        }
+    }
+
+    void loadFromFile(const std::string& filename) {
+        students.clear();
+
+        std::ifstream file(filename);
+        if (file.is_open()) {
+            Student student;
+            while (file >> student) {
+                students.push_back(student);
+            }
+            file.close();
+            std::cout << "Data loaded from " << filename << "\n";
+        } else {
+            std::cerr << "Unable to open file for loading: " << filename << "\n";
+        }
+    }
+
+    void displayStudents() const {
+        for (const auto& student : students) {
+            std::cout << "Name: " << student.name << ", Student ID: " << student.studentID << "\n";
+        }
+    }
+};
+
+int main() {
+    StudentManagementSystem sms;
+
+    sms.addStudent(Student("John Doe", 1001));
+    sms.addStudent(Student("Alice Smith", 1002));
+    sms.addStudent(Student("Bob Johnson", 1003));
+
+    sms.saveToFile("students.txt");
+
+    sms = StudentManagementSystem();
+
+    sms.loadFromFile("students.txt");
+
+    sms.displayStudents();
+
+    return 0;
+}
